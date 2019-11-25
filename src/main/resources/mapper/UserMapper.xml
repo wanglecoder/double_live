@@ -3,8 +3,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.ds.double_live_demo.mapper.UserMapper">
-    <select id="selectById" resultType="cn.ds.double_live_demo.entity.User">
-        select * from user_account;
+    <select id="selectById" resultType="cn.ds.double_live_demo.entity.User" parameterType="string">
+        select * from user_account where global_id = #{id};
     </select>
     <insert id="add" parameterType="cn.ds.double_live_demo.entity.User">
         insert into user_account (global_id,username,password,salt,other) values (#{globalId},#{username},#{password},#{salt},#{other});

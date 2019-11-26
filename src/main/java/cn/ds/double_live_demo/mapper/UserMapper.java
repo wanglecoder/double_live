@@ -7,4 +7,6 @@ public interface UserMapper {
     int add(User user) ;
 
     User selectById(String id);
+
+    User selectByUserName(String username);
 }

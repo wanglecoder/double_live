@@ -19,10 +19,19 @@ public class UserController {
 
     @PostMapping("register")
     public BaseResponse<String> register(@RequestBody User user, HttpServletRequest request, HttpServletResponse response){
+        User res = userService.selectByUserName(user.getUsername());
+        if(res != null) return new BaseResponse<>(Constant.PARAM_ERROR,"用户名已存在,注册失败");
         String userId = userService.addUser(user);
         String jwt = JwtUtil.generateJWT(userId, user.getUsername(), request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);
         return new BaseResponse<>(Constant.SUCCESS,"注册成功");
+    }
+
+    @PostMapping("check/name")
+    public BaseResponse<Boolean> CheckName(@RequestBody User user, HttpServletRequest request, HttpServletResponse response){
+        User res = userService.selectByUserName(user.getUsername());
+        if(res != null) return new BaseResponse<>(Constant.SUCCESS,"用户名可用",true);
+        return new BaseResponse<>(Constant.SUCCESS,"用户名已存在",false);
     }
 
     @PostMapping("login")

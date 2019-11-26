@@ -6,4 +6,6 @@ public interface UserService {
     String addUser(User user);
 
     User selectById(String id);
+
+    User selectByUserName(String username);
 }

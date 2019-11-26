@@ -6,6 +6,9 @@
     <select id="selectById" resultType="cn.ds.double_live_demo.entity.User" parameterType="string">
         select * from user_account where global_id = #{id};
     </select>
+    <select id="selectByUserName" resultType="cn.ds.double_live_demo.entity.User" parameterType="string">
+        select * from user_account where username = #{username};
+    </select>
     <insert id="add" parameterType="cn.ds.double_live_demo.entity.User">
         insert into user_account (global_id,username,password,salt,other) values (#{globalId},#{username},#{password},#{salt},#{other});
     </insert>

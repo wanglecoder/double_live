@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping("check/name")
     public BaseResponse<Boolean> CheckName(@RequestBody User user, HttpServletRequest request, HttpServletResponse response){
         User res = userService.selectByUserName(user.getUsername());
-        if(res != null) return new BaseResponse<>(Constant.SUCCESS,"用户名可用",true);
+        if(res == null) return new BaseResponse<>(Constant.SUCCESS,"用户名可用",true);
         return new BaseResponse<>(Constant.SUCCESS,"用户名已存在",false);
     }
 

@@ -38,7 +38,7 @@ public class UserController {
 
     @PostMapping("login")
     public BaseResponse<String> login(@RequestBody User user, HttpServletResponse response,HttpServletRequest request){
-        User auth = userService.selectById(user.getGlobalId());
+        User auth = userService.selectById(user.getUsername());
         if(auth == null || !auth.getPassword().equals(user.getPassword())) return new BaseResponse<>(Constant.AUTH_FAIL,"用户名或密码错误");
         String jwt = JwtUtil.generateJWT(auth.getGlobalId(), user.getUsername(), request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);

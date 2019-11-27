@@ -19,4 +19,10 @@ public class GlobalExceptionHandler {
         String defaultMessage = e.getBindingResult().getFieldError().getDefaultMessage();
         return new BaseResponse<>(Constant.PARAM_ERROR,defaultMessage);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public BaseResponse<String> illegalArgumentException(IllegalArgumentException e){
+        //获取异常中随机一个异常信息
+        return new BaseResponse<>(Constant.PARAM_ERROR,e.getMessage());
+    }
 }

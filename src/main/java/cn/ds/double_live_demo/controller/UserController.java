@@ -5,6 +5,7 @@ import cn.ds.double_live_demo.service.UserService;
 import cn.ds.double_live_demo.util.BaseResponse;
 import cn.ds.double_live_demo.util.Constant;
 import cn.ds.double_live_demo.util.JwtUtil;
+import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,9 @@ public class UserController {
     }
 
     @PostMapping("check/name")
-    public BaseResponse<Boolean> CheckName(@RequestBody User user, HttpServletRequest request, HttpServletResponse response){
-        User res = userService.selectByUserName(user.getUsername());
+    public BaseResponse<Boolean> CheckName(@RequestParam String username, HttpServletRequest request, HttpServletResponse response){
+        Preconditions.checkNotNull(username,"用户名不能为空");
+        User res = userService.selectByUserName(username);
         if(res == null) return new BaseResponse<>(Constant.SUCCESS,"用户名可用",true);
         return new BaseResponse<>(Constant.SUCCESS,"用户名已存在",false);
     }

@@ -7,6 +7,7 @@ import cn.ds.double_live_demo.util.Constant;
 import cn.ds.double_live_demo.util.JwtUtil;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,11 +20,16 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("register")
-    public BaseResponse<String> register(@RequestBody User user, HttpServletRequest request, HttpServletResponse response){
-        User res = userService.selectByUserName(user.getUsername());
+    public BaseResponse<String> register(@RequestParam String username,@RequestParam String password,  HttpServletRequest request, HttpServletResponse response){
+        Preconditions.checkNotNull(username,"用户名不能为空");
+        Preconditions.checkNotNull(password,"密码不能为空");
+        User res = userService.selectByUserName(username);
         if(res != null) return new BaseResponse<>(Constant.PARAM_ERROR,"用户名已存在,注册失败");
-        String userId = userService.addUser(user);
-        String jwt = JwtUtil.generateJWT(userId, user.getUsername(), request.getHeader("User-Agent"));
+        res = new User();
+        res.setUsername(username);
+        res.setPassword(password);
+        String userId = userService.addUser(res);
+        String jwt = JwtUtil.generateJWT(userId, username, request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);
         return new BaseResponse<>(Constant.SUCCESS,"注册成功");
     }
@@ -37,10 +43,13 @@ public class UserController {
     }
 
     @PostMapping("login")
-    public BaseResponse<String> login(@RequestBody User user, HttpServletResponse response,HttpServletRequest request){
-        User auth = userService.selectById(user.getUsername());
-        if(auth == null || !auth.getPassword().equals(user.getPassword())) return new BaseResponse<>(Constant.AUTH_FAIL,"用户名或密码错误");
-        String jwt = JwtUtil.generateJWT(auth.getGlobalId(), user.getUsername(), request.getHeader("User-Agent"));
+    public BaseResponse<String> login(@RequestParam String username,@RequestParam String password, HttpServletResponse response,HttpServletRequest request){
+        if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
+            return new BaseResponse<>(Constant.PARAM_ERROR,"用户名密码不能为空");
+        }
+        User auth = userService.selectByUserName(username);
+        if(auth == null || !auth.getPassword().equals(password)) return new BaseResponse<>(Constant.AUTH_FAIL,"用户名或密码错误");
+        String jwt = JwtUtil.generateJWT(auth.getGlobalId(), username, request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);
         return new BaseResponse<>(Constant.SUCCESS,"登录成功");
     }

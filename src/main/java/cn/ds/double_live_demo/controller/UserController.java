@@ -2,9 +2,7 @@ package cn.ds.double_live_demo.controller;
 
 import cn.ds.double_live_demo.entity.User;
 import cn.ds.double_live_demo.service.UserService;
-import cn.ds.double_live_demo.util.BaseResponse;
-import cn.ds.double_live_demo.util.Constant;
-import cn.ds.double_live_demo.util.JwtUtil;
+import cn.ds.double_live_demo.util.*;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -26,8 +24,11 @@ public class UserController {
         User res = userService.selectByUserName(username);
         if(res != null) return new BaseResponse<>(Constant.PARAM_ERROR,"用户名已存在,注册失败");
         res = new User();
+        String salt = RandomUtil.generateRandom(8);
+        String newPassWord = PasswordUtil.encrypt(password, salt);
         res.setUsername(username);
-        res.setPassword(password);
+        res.setPassword(newPassWord);
+        res.setSalt(salt);
         String userId = userService.addUser(res);
         String jwt = JwtUtil.generateJWT(userId, username, request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);
@@ -44,11 +45,14 @@ public class UserController {
 
     @PostMapping("login")
     public BaseResponse<String> login(@RequestParam String username,@RequestParam String password, HttpServletResponse response,HttpServletRequest request){
-        if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
-            return new BaseResponse<>(Constant.PARAM_ERROR,"用户名密码不能为空");
-        }
+        Preconditions.checkNotNull(username,"用户名不能为空");
+        Preconditions.checkNotNull(password,"密码不能为空");
         User auth = userService.selectByUserName(username);
-        if(auth == null || !auth.getPassword().equals(password)) return new BaseResponse<>(Constant.AUTH_FAIL,"用户名或密码错误");
+        Preconditions.checkNotNull(auth,"用户不存在");
+        Preconditions.checkNotNull(auth.getPassword(),"用户不存在");
+        Preconditions.checkNotNull(auth.getSalt(),"用户不存在");
+        String encrypt = PasswordUtil.encrypt(password, auth.getSalt());
+        if(!auth.getPassword().equals(encrypt)) return new BaseResponse<>(Constant.AUTH_FAIL,"用户名或密码错误");
         String jwt = JwtUtil.generateJWT(auth.getGlobalId(), username, request.getHeader("User-Agent"));
         response.setHeader("User-Token", jwt);
         return new BaseResponse<>(Constant.SUCCESS,"登录成功");

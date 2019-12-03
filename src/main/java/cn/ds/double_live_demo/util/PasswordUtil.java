@@ -1,5 +1,6 @@
 package cn.ds.double_live_demo.util;
 
+import java.security.MessageDigest;
 
 public class PasswordUtil {
 
@@ -27,9 +28,22 @@ public class PasswordUtil {
 		if (hashIterations <= 0) {
 			hashIterations = 1;
 		}
-		String encryptPassword = encrypt(password, salt, hashIterations);
-		return encryptPassword;
+		try {
+			password = password + salt;
+			MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+			messageDigest.update(password.getBytes("UTF8"));
+			byte message[] = messageDigest.digest();
+			String result = "";
+			for (int i = 0; i < message.length; i++) {
+				result += Integer.toHexString((0x000000FF & message[i]) | 0xFFFFFF00).substring(6);
+			}
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
+
 
 	public static void main(String[] args) {
 		try {
@@ -39,6 +53,7 @@ public class PasswordUtil {
 //			System.out.println(salt);
 			String encryptPassword = encrypt(password, salt);
 			System.out.println(encryptPassword);
+			System.out.println(salt);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
